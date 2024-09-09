@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .player {
+            margin: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dice Game</h1>
+    
+    <div class="player">
+        <h2>Player A</h2>
+        <button class="button" onclick="rollDice('A')">Roll Dice</button>
+        <p id="resultA">Roll the dice to see your score.</p>
+    </div>
+    
+    <div class="player">
+        <h2>Player B</h2>
+        <button class="button" onclick="rollDice('B')">Roll Dice</button>
+        <p id="resultB">Roll the dice to see your score.</p>
+    </div>
+
+    <button class="button" onclick="determineWinner()">Find Winner</button>
+    <p id="winner">Click "Find Winner" to see who won!</p>
+    
+    <script>
+        let scoreA = 0;
+        let scoreB = 0;
+
+        function rollDice(player) {
+            const diceRoll = Math.floor(Math.random() * 6) + 1;
+            if (player === 'A') {
+                scoreA = diceRoll;
+                document.getElementById('resultA').innerText = `Player A rolled: ${diceRoll}`;
+            } else if (player === 'B') {
+                scoreB = diceRoll;
+                document.getElementById('resultB').innerText = `Player B rolled: ${diceRoll}`;
+            }
+        }
+
+        function determineWinner() {
+            if (scoreA > scoreB) {
+                document.getElementById('winner').innerText = 'Player A wins!';
+            } else if (scoreB > scoreA) {
+                document.getElementById('winner').innerText = 'Player B wins!';
+            } else {
+                document.getElementById('winner').innerText = 'It\'s a tie!';
+            }
+        }
+    </script>
+</body>
+</html>
