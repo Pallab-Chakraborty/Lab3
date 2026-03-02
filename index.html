@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lab3 — Pallab's Interactive Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & ROOT ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#090b10;
+  --surface:#0f1118;
+  --card:#161a26;
+  --border:#1e2438;
+  --cyan:#00f0ff;
+  --amber:#ffb800;
+  --pink:#ff3b8b;
+  --green:#00e676;
+  --text:#e8eaf0;
+  --muted:#5a6080;
+  --font-head:'Press Start 2P',monospace;
+  --font-body:'Outfit',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  cursor:default;
+}
+/* scanline overlay */
+body::before{
+  content:'';
+  position:fixed;inset:0;z-index:9999;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px
+  );
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:3px;}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(9,11,16,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:1rem 5%;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.logo{
+  font-family:var(--font-head);
+  font-size:.65rem;
+  color:var(--cyan);
+  text-shadow:0 0 20px rgba(0,240,255,0.6);
+  letter-spacing:2px;
+}
+.logo span{color:var(--amber);}
+nav{display:flex;gap:2rem;}
+nav a{
+  font-size:.75rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  text-decoration:none;color:var(--muted);
+  transition:color .2s;
+  position:relative;
+}
+nav a::after{
+  content:'';position:absolute;bottom:-4px;left:0;
+  width:0;height:1px;background:var(--cyan);
+  transition:width .3s;
+}
+nav a:hover{color:var(--cyan);}
+nav a:hover::after{width:100%;}
+
+/* ── HERO ── */
+#hero{
+  min-height:80vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;
+  padding:5rem 5% 4rem;
+  position:relative;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
+.hero-badge{
+  font-family:var(--font-head);
+  font-size:.5rem;letter-spacing:3px;
+  color:var(--amber);
+  border:1px solid rgba(255,184,0,0.3);
+  padding:.5rem 1rem;border-radius:2px;
+  margin-bottom:2rem;
+  opacity:0;animation:fadeUp .7s .2s forwards;
+}
+.hero-title{
+  font-family:var(--font-head);
+  font-size:clamp(1.2rem,4vw,2.8rem);
+  line-height:1.6;
+  opacity:0;animation:fadeUp .8s .4s forwards;
+}
+.hero-title .c1{color:var(--cyan);text-shadow:0 0 30px rgba(0,240,255,0.5);}
+.hero-title .c2{color:var(--amber);text-shadow:0 0 30px rgba(255,184,0,0.5);}
+.hero-title .c3{color:var(--pink);text-shadow:0 0 30px rgba(255,59,139,0.5);}
+.hero-sub{
+  margin-top:1.5rem;font-size:1rem;font-weight:300;
+  color:var(--muted);max-width:500px;
+  opacity:0;animation:fadeUp .8s .6s forwards;
+}
+.hero-pills{
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+  margin-top:2.5rem;
+  opacity:0;animation:fadeUp .8s .8s forwards;
+}
+.pill{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem 1.2rem;border-radius:50px;
+  font-size:.8rem;font-weight:500;letter-spacing:.5px;
+  text-decoration:none;
+  transition:transform .2s,box-shadow .2s;
+}
+.pill:hover{transform:translateY(-3px);}
+.pill-cyan{background:rgba(0,240,255,0.1);border:1px solid rgba(0,240,255,0.4);color:var(--cyan);}
+.pill-cyan:hover{box-shadow:0 8px 25px rgba(0,240,255,0.2);}
+.pill-amber{background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.4);color:var(--amber);}
+.pill-amber:hover{box-shadow:0 8px 25px rgba(255,184,0,0.2);}
+.pill-pink{background:rgba(255,59,139,0.1);border:1px solid rgba(255,59,139,0.4);color:var(--pink);}
+.pill-pink:hover{box-shadow:0 8px 25px rgba(255,59,139,0.2);}
+
+/* ── SECTION COMMON ── */
+section{padding:5rem 5%;}
+.section-header{text-align:center;margin-bottom:3rem;}
+.section-num{
+  font-family:var(--font-head);font-size:.5rem;
+  color:var(--muted);letter-spacing:3px;
+}
+.section-title{
+  font-family:var(--font-head);
+  font-size:clamp(.9rem,2.5vw,1.4rem);
+  margin-top:.8rem;line-height:1.8;
+}
+.section-desc{
+  font-size:.95rem;color:var(--muted);
+  margin-top:.8rem;font-weight:300;
+}
+
+/* ── PANEL ── */
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:2rem;
+  position:relative;
+  overflow:hidden;
+}
+.panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.panel-cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.panel-amber::before{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+.panel-pink::before{background:linear-gradient(90deg,transparent,var(--pink),transparent);}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.75rem 1.8rem;border-radius:4px;border:none;
+  font-family:var(--font-body);font-size:.85rem;font-weight:600;
+  letter-spacing:1px;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,opacity .2s;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(0);}
+.btn-cyan{background:var(--cyan);color:#000;}
+.btn-cyan:hover{box-shadow:0 8px 25px rgba(0,240,255,0.4);}
+.btn-amber{background:var(--amber);color:#000;}
+.btn-amber:hover{box-shadow:0 8px 25px rgba(255,184,0,0.4);}
+.btn-pink{background:var(--pink);color:#fff;}
+.btn-pink:hover{box-shadow:0 8px 25px rgba(255,59,139,0.4);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* ── INPUTS ── */
+.input{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:.65rem 1rem;
+  color:var(--text);font-family:var(--font-body);font-size:.9rem;
+  transition:border-color .2s;width:100%;
+}
+.input:focus{outline:none;border-color:var(--cyan);}
+label{font-size:.8rem;font-weight:500;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:.4rem;}
+
+/* ══════════════════════════════════
+   SECTION 1 — IMAGE SIZER
+══════════════════════════════════ */
+#imagesizer{background:rgba(0,240,255,0.01);}
+.sizer-layout{display:grid;grid-template-columns:340px 1fr;gap:2rem;align-items:start;}
+.sizer-controls{display:flex;flex-direction:column;gap:1.2rem;}
+.sizer-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.lock-row{display:flex;align-items:center;gap:.8rem;}
+.lock-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;font-size:1rem;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.lock-btn.locked{border-color:var(--cyan);color:var(--cyan);}
+.lock-label{font-size:.75rem;color:var(--muted);}
+.upload-zone{
+  border:2px dashed var(--border);border-radius:8px;
+  padding:2rem;text-align:center;cursor:pointer;
+  transition:border-color .3s,background .3s;
+  position:relative;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--cyan);background:rgba(0,240,255,0.04);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-icon{font-size:2.5rem;margin-bottom:.8rem;}
+.upload-text{font-size:.85rem;color:var(--muted);}
+.upload-text strong{color:var(--cyan);}
+.sizer-preview-area{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;min-height:300px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.preview-placeholder{text-align:center;color:var(--muted);}
+.preview-placeholder div{font-size:3rem;margin-bottom:.5rem;}
+.preview-placeholder p{font-size:.85rem;}
+#previewCanvas{max-width:100%;max-height:450px;display:none;border-radius:4px;}
+.sizer-info{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  margin-top:1rem;
+}
+.info-chip{
+  background:var(--surface);border:1px solid var(--border);
+  padding:.35rem .8rem;border-radius:4px;
+  font-size:.75rem;color:var(--muted);
+}
+.info-chip span{color:var(--cyan);font-weight:600;}
+.format-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.quality-row{display:flex;align-items:center;gap:1rem;}
+.quality-row input[type=range]{flex:1;accent-color:var(--cyan);}
+.quality-val{font-size:.85rem;color:var(--cyan);min-width:40px;text-align:right;}
+
+/* ══════════════════════════════════
+   SECTION 2 — PLAY CARDS (War)
+══════════════════════════════════ */
+#playcards{border-top:1px solid var(--border);}
+.war-layout{max-width:700px;margin:0 auto;}
+.war-scores{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  gap:1rem;align-items:center;margin-bottom:2rem;
+}
+.score-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:1.2rem;text-align:center;
+}
+.score-box.active{border-color:var(--amber);}
+.score-name{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+.score-num{font-family:var(--font-head);font-size:1.6rem;color:var(--amber);}
+.score-cards{font-size:.7rem;color:var(--muted);margin-top:.3rem;}
+.vs-badge{
+  font-family:var(--font-head);font-size:.7rem;
+  color:var(--pink);text-align:center;
+}
+.war-arena{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  gap:1.5rem;align-items:center;margin-bottom:2rem;
+}
+.arena-side{text-align:center;}
+.arena-label{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+/* playing card */
+.playing-card{
+  width:110px;height:155px;
+  background:var(--card);border:2px solid var(--border);
+  border-radius:12px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;font-size:2.2rem;
+  transition:transform .4s,box-shadow .4s;
+  cursor:default;
+  perspective:600px;
+}
+.playing-card.red{color:#ff4466;}
+.playing-card.black{color:#e8eaf0;}
+.playing-card.face-down{
+  background:repeating-linear-gradient(
+    45deg,#1a1f32,#1a1f32 4px,#161a26 4px,#161a26 8px
+  );
+  border-color:var(--border);
+}
+.card-rank{
+  position:absolute;top:8px;left:10px;
+  font-size:.85rem;font-weight:700;font-family:var(--font-body);
+  line-height:1;
+}
+.card-rank-bot{
+  position:absolute;bottom:8px;right:10px;
+  font-size:.85rem;font-weight:700;font-family:var(--font-body);
+  transform:rotate(180deg);line-height:1;
+}
+.card-center{font-size:2.5rem;}
+.card-slot{
+  width:110px;height:155px;margin:0 auto;
+  background:rgba(255,255,255,0.02);
+  border:2px dashed var(--border);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:.7rem;letter-spacing:1px;
+}
+.arena-center{text-align:center;}
+.war-result{
+  font-family:var(--font-head);font-size:.6rem;
+  padding:.5rem 1rem;border-radius:4px;
+  min-height:36px;display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.war-result.win{background:rgba(0,230,118,0.15);color:var(--green);border:1px solid var(--green);}
+.war-result.lose{background:rgba(255,59,139,0.15);color:var(--pink);border:1px solid var(--pink);}
+.war-result.tie{background:rgba(255,184,0,0.15);color:var(--amber);border:1px solid var(--amber);}
+.war-result.idle{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.war-log{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:1rem;max-height:140px;overflow-y:auto;
+  margin-top:1.5rem;
+}
+.log-title{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+.log-item{font-size:.8rem;padding:.3rem 0;border-bottom:1px solid var(--border);color:var(--muted);}
+.log-item:last-child{border-bottom:none;}
+.log-item .win{color:var(--green);}
+.log-item .lose{color:var(--pink);}
+.log-item .tie{color:var(--amber);}
+.war-btns{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;}
+
+/* card flip animation */
+@keyframes flipIn{
+  0%{transform:rotateY(90deg);opacity:0;}
+  100%{transform:rotateY(0deg);opacity:1;}
+}
+.flip-anim{animation:flipIn .4s ease-out forwards;}
+
+/* ══════════════════════════════════
+   SECTION 3 — ROLL DICE
+══════════════════════════════════ */
+#rolldice{border-top:1px solid var(--border);background:rgba(255,59,139,0.01);}
+.dice-layout{max-width:700px;margin:0 auto;}
+.dice-controls{
+  display:flex;align-items:center;gap:1.5rem;
+  flex-wrap:wrap;justify-content:center;
+  margin-bottom:2.5rem;
+}
+.dice-count-label{font-size:.8rem;color:var(--muted);letter-spacing:1px;}
+.dice-count-row{display:flex;align-items:center;gap:.8rem;}
+.count-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:1.1rem;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.count-btn:hover{border-color:var(--pink);color:var(--pink);}
+.count-display{
+  font-family:var(--font-head);font-size:1.2rem;
+  color:var(--pink);min-width:30px;text-align:center;
+}
+.dice-tray{
+  display:flex;flex-wrap:wrap;gap:1.5rem;
+  justify-content:center;min-height:120px;
+  margin-bottom:2rem;
+  padding:1.5rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+}
+/* 3D CSS Dice */
+.die-wrap{width:80px;height:80px;perspective:300px;}
+.die{
+  width:80px;height:80px;
+  transform-style:preserve-3d;
+  position:relative;
+  transition:transform .8s cubic-bezier(.25,.46,.45,.94);
+}
+.die-face{
+  position:absolute;width:80px;height:80px;
+  background:var(--card);border:2px solid var(--border);
+  border-radius:12px;
+  display:grid;padding:10px;gap:5px;
+}
+.die.rolling{animation:rollDice .8s ease-out forwards;}
+@keyframes rollDice{
+  0%{transform:rotateX(0)rotateY(0);}
+  25%{transform:rotateX(360deg)rotateY(180deg);}
+  50%{transform:rotateX(180deg)rotateY(360deg);}
+  75%{transform:rotateX(270deg)rotateY(90deg);}
+  100%{transform:rotateX(var(--rx))rotateY(var(--ry));}
+}
+.die-face:nth-child(1){transform:translateZ(40px);}
+.die-face:nth-child(2){transform:rotateY(180deg) translateZ(40px);}
+.die-face:nth-child(3){transform:rotateY(90deg) translateZ(40px);}
+.die-face:nth-child(4){transform:rotateY(-90deg) translateZ(40px);}
+.die-face:nth-child(5){transform:rotateX(90deg) translateZ(40px);}
+.die-face:nth-child(6){transform:rotateX(-90deg) translateZ(40px);}
+.dot{
+  width:12px;height:12px;
+  background:var(--pink);
+  border-radius:50%;
+  box-shadow:0 0 6px rgba(255,59,139,0.6);
+}
+/* dot layouts */
+.face-1{place-items:center;}
+.face-2{grid-template-columns:1fr 1fr;align-items:start;}
+.face-2 .dot:nth-child(2){align-self:end;}
+.face-3{grid-template-columns:1fr 1fr 1fr;align-items:center;}
+.face-3 .dot:nth-child(1){grid-column:1;align-self:start;}
+.face-3 .dot:nth-child(2){grid-column:2;align-self:center;}
+.face-3 .dot:nth-child(3){grid-column:3;align-self:end;}
+.face-4{grid-template-columns:1fr 1fr;}
+.face-5{grid-template-columns:1fr 1fr;}
+.face-5 .center-dot{grid-column:1/3;place-self:center;}
+.face-6{grid-template-columns:1fr 1fr;}
+
+.dice-sum-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:1.5rem;
+  display:flex;gap:2rem;align-items:center;justify-content:center;
+  flex-wrap:wrap;
+}
+.sum-item{text-align:center;}
+.sum-label{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;}
+.sum-value{font-family:var(--font-head);font-size:1.4rem;color:var(--pink);}
+.sum-value.total{color:var(--amber);font-size:1.8rem;}
+.roll-history{
+  margin-top:1.5rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:1rem;
+}
+.history-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem;}
+.h-chip{
+  font-size:.7rem;padding:.25rem .6rem;
+  border-radius:50px;
+  background:rgba(255,59,139,0.1);
+  border:1px solid rgba(255,59,139,0.3);
+  color:var(--pink);
+}
+.dice-btns{display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+footer{
+  padding:2rem 5%;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.75rem;color:var(--muted);flex-wrap:wrap;gap:1rem;
+}
+footer a{color:var(--cyan);text-decoration:none;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sizer-layout{grid-template-columns:1fr;}
+  .war-arena{grid-template-columns:1fr 60px 1fr;}
+  .playing-card,.card-slot{width:85px;height:120px;}
+  .card-center{font-size:1.8rem;}
+  nav{gap:1rem;}
+}
+@media(max-width:480px){
+  .logo{font-size:.5rem;}
+  .war-arena{gap:.8rem;}
+  .playing-card,.card-slot{width:72px;height:100px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">LAB<span>3</span></div>
+  <nav>
+    <a href="#imagesizer">Sizer</a>
+    <a href="#playcards">Cards</a>
+    <a href="#rolldice">Dice</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">⚡ Interactive Lab by Pallab Chakraborty</div>
+  <h1 class="hero-title">
+    <span class="c1">IMAGE</span> SIZER<br/>
+    PLAY <span class="c2">CARDS</span><br/>
+    ROLL <span class="c3">DICE</span>
+  </h1>
+  <p class="hero-sub">Three powerful interactive tools in one place. Built with pure HTML, CSS & JavaScript.</p>
+  <div class="hero-pills">
+    <a href="#imagesizer" class="pill pill-cyan">🖼️ Image Sizer</a>
+    <a href="#playcards" class="pill pill-amber">🃏 Play Cards</a>
+    <a href="#rolldice" class="pill pill-pink">🎲 Roll Dice</a>
+  </div>
+</section>
+
+<!-- ══ SECTION 1: IMAGE SIZER ══ -->
+<section id="imagesizer">
+  <div class="section-header reveal">
+    <div class="section-num">01 / 03</div>
+    <h2 class="section-title" style="color:var(--cyan)">IMAGE SIZER</h2>
+    <p class="section-desc">Upload, resize, convert format & download your image instantly — all in the browser</p>
+  </div>
+
+  <div class="panel panel-cyan reveal">
+    <div class="sizer-layout">
+      <!-- Controls -->
+      <div class="sizer-controls">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="imgInput" accept="image/*"/>
+          <div class="upload-icon">📁</div>
+          <div class="upload-text"><strong>Click or drag</strong> to upload an image</div>
+          <div class="upload-text" style="margin-top:.3rem;font-size:.75rem;">PNG · JPG · WEBP · GIF</div>
+        </div>
+
+        <div class="sizer-row">
+          <div>
+            <label>WIDTH (px)</label>
+            <input class="input" type="number" id="widthInput" placeholder="e.g. 800"/>
+          </div>
+          <div>
+            <label>HEIGHT (px)</label>
+            <input class="input" type="number" id="heightInput" placeholder="e.g. 600"/>
+          </div>
+        </div>
+
+        <div class="lock-row">
+          <button class="lock-btn locked" id="lockBtn" title="Lock aspect ratio">🔒</button>
+          <span class="lock-label" id="lockLabel">Aspect ratio locked</span>
+        </div>
+
+        <div class="format-row">
+          <div>
+            <label>OUTPUT FORMAT</label>
+            <select class="input" id="formatSelect">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg" selected>JPEG</option>
+              <option value="image/webp">WEBP</option>
+            </select>
+          </div>
+          <div>
+            <label>QUALITY</label>
+            <div class="quality-row">
+              <input type="range" id="qualityRange" min="10" max="100" value="90"/>
+              <span class="quality-val" id="qualityVal">90%</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-cyan" id="resizeBtn" disabled style="width:100%;justify-content:center;">
+          ⚡ Resize & Preview
+        </button>
+        <button class="btn btn-ghost" id="downloadBtn" disabled style="width:100%;justify-content:center;">
+          ⬇️ Download Image
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div>
+        <div class="sizer-preview-area">
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <div>🖼️</div>
+            <p>Preview will appear here</p>
+          </div>
+          <canvas id="previewCanvas"></canvas>
+        </div>
+        <div class="sizer-info" id="sizerInfo" style="display:none;">
+          <div class="info-chip">Original: <span id="origSize">—</span></div>
+          <div class="info-chip">Output: <span id="outSize">—</span></div>
+          <div class="info-chip">Dims: <span id="outDims">—</span></div>
+          <div class="info-chip">Saved: <span id="savedPct">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECTION 2: PLAY CARDS ══ -->
+<section id="playcards">
+  <div class="section-header reveal">
+    <div class="section-num">02 / 03</div>
+    <h2 class="section-title" style="color:var(--amber)">PLAY CARDS — WAR</h2>
+    <p class="section-desc">Draw a card each round. Highest card wins the round. Most wins after 10 rounds wins the game!</p>
+  </div>
+
+  <div class="panel panel-amber reveal war-layout">
+    <!-- Scores -->
+    <div class="war-scores">
+      <div class="score-box" id="pScoreBox">
+        <div class="score-name">You</div>
+        <div class="score-num" id="pScore">0</div>
+        <div class="score-cards" id="pCardsLeft">26 cards left</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="score-box" id="cScoreBox">
+        <div class="score-name">CPU</div>
+        <div class="score-num" id="cScore">0</div>
+        <div class="score-cards" id="cCardsLeft">26 cards left</div>
+      </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="war-arena">
+      <div class="arena-side">
+        <div class="arena-label">Your Card</div>
+        <div class="card-slot" id="pCardSlot">
+          <span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>
+        </div>
+      </div>
+      <div class="arena-center">
+        <div class="war-result idle" id="warResult">— DRAW A CARD —</div>
+        <div style="margin-top:.8rem;font-size:.7rem;color:var(--muted)" id="roundNum">Round 1 / 26</div>
+      </div>
+      <div class="arena-side">
+        <div class="arena-label">CPU Card</div>
+        <div class="card-slot" id="cCardSlot">
+          <span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="war-btns">
+      <button class="btn btn-amber" id="drawBtn">🃏 Draw Card</button>
+      <button class="btn btn-ghost" id="newGameBtn">🔄 New Game</button>
+    </div>
+
+    <!-- Log -->
+    <div class="war-log">
+      <div class="log-title">📜 Battle Log</div>
+      <div id="battleLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECTION 3: ROLL DICE ══ -->
+<section id="rolldice">
+  <div class="section-header reveal">
+    <div class="section-num">03 / 03</div>
+    <h2 class="section-title" style="color:var(--pink)">ROLL DICE</h2>
+    <p class="section-desc">Roll up to 6 dice at once with a satisfying 3D animation. Track your totals and history.</p>
+  </div>
+
+  <div class="panel panel-pink reveal dice-layout">
+    <!-- Controls -->
+    <div class="dice-controls">
+      <div class="dice-count-label">NUMBER OF DICE</div>
+      <div class="dice-count-row">
+        <button class="count-btn" id="diceDown">−</button>
+        <div class="count-display" id="diceCountDisplay">2</div>
+        <button class="count-btn" id="diceUp">+</button>
+      </div>
+    </div>
+
+    <!-- Tray -->
+    <div class="dice-tray" id="diceTray"></div>
+
+    <!-- Stats -->
+    <div class="dice-sum-panel" id="sumPanel" style="display:none;">
+      <div class="sum-item">
+        <div class="sum-label">Dice Results</div>
+        <div class="sum-value" id="diceResults">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Total</div>
+        <div class="sum-value total" id="diceTotal">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Highest</div>
+        <div class="sum-value" id="diceHigh">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Average</div>
+        <div class="sum-value" id="diceAvg">—</div>
+      </div>
+    </div>
+
+    <!-- Roll History -->
+    <div class="roll-history" id="rollHistoryPanel" style="display:none;">
+      <div class="log-title">📊 Roll History (last 10)</div>
+      <div class="history-chips" id="historyChips"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="dice-btns">
+      <button class="btn btn-pink" id="rollBtn">🎲 Roll Dice!</button>
+      <button class="btn btn-ghost" id="clearHistBtn">🗑️ Clear History</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>Built by <a href="https://github.com/Pallab-Chakraborty" target="_blank">Pallab Chakraborty</a> · JNU CSE</span>
+  <span>Lab3 · Pure HTML/CSS/JS</span>
+</footer>
+
+<script>
+/* ══════════════════════════
+   REVEAL ON SCROLL
+══════════════════════════ */
+const reveals = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver(e => e.forEach(el => {
+  if(el.isIntersecting) el.target.classList.add('visible');
+}),{threshold:.12});
+reveals.forEach(r => ro.observe(r));
+
+/* ══════════════════════════
+   IMAGE SIZER
+══════════════════════════ */
+const imgInput = document.getElementById('imgInput');
+const uploadZone = document.getElementById('uploadZone');
+const widthInput = document.getElementById('widthInput');
+const heightInput = document.getElementById('heightInput');
+const lockBtn = document.getElementById('lockBtn');
+const lockLabel = document.getElementById('lockLabel');
+const formatSelect = document.getElementById('formatSelect');
+const qualityRange = document.getElementById('qualityRange');
+const qualityVal = document.getElementById('qualityVal');
+const resizeBtn = document.getElementById('resizeBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const previewCanvas = document.getElementById('previewCanvas');
+const previewPlaceholder = document.getElementById('previewPlaceholder');
+const sizerInfo = document.getElementById('sizerInfo');
+
+let origImg = null, aspectRatio = 1, locked = true, origFileSize = 0;
+
+qualityRange.addEventListener('input', () => qualityVal.textContent = qualityRange.value + '%');
+
+// drag & drop
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  if(e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+});
+imgInput.addEventListener('change', e => { if(e.target.files[0]) loadImage(e.target.files[0]); });
+
+function loadImage(file) {
+  origFileSize = file.size;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      origImg = img;
+      aspectRatio = img.width / img.height;
+      widthInput.value = img.width;
+      heightInput.value = img.height;
+      resizeBtn.disabled = false;
+      resizeBtn.click();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+lockBtn.addEventListener('click', () => {
+  locked = !locked;
+  lockBtn.textContent = locked ? '🔒' : '🔓';
+  lockBtn.classList.toggle('locked', locked);
+  lockLabel.textContent = locked ? 'Aspect ratio locked' : 'Aspect ratio free';
+});
+
+widthInput.addEventListener('input', () => {
+  if(locked && origImg) heightInput.value = Math.round(widthInput.value / aspectRatio);
+});
+heightInput.addEventListener('input', () => {
+  if(locked && origImg) widthInput.value = Math.round(heightInput.value * aspectRatio);
+});
+
+resizeBtn.addEventListener('click', () => {
+  if(!origImg) return;
+  const w = parseInt(widthInput.value) || origImg.width;
+  const h = parseInt(heightInput.value) || origImg.height;
+  previewCanvas.width = w; previewCanvas.height = h;
+  const ctx = previewCanvas.getContext('2d');
+  ctx.drawImage(origImg, 0, 0, w, h);
+  previewCanvas.style.display = 'block';
+  previewPlaceholder.style.display = 'none';
+  downloadBtn.disabled = false;
+
+  // estimate output size
+  const dataURL = previewCanvas.toDataURL(formatSelect.value, qualityRange.value/100);
+  const outBytes = Math.round((dataURL.length * 3/4));
+  const saved = Math.round((1 - outBytes/origFileSize)*100);
+  document.getElementById('origSize').textContent = fmtBytes(origFileSize);
+  document.getElementById('outSize').textContent = fmtBytes(outBytes);
+  document.getElementById('outDims').textContent = `${w}×${h}`;
+  document.getElementById('savedPct').textContent = saved > 0 ? `${saved}% smaller` : `${-saved}% larger`;
+  sizerInfo.style.display = 'flex';
+});
+
+downloadBtn.addEventListener('click', () => {
+  const fmt = formatSelect.value;
+  const ext = fmt.split('/')[1];
+  const dataURL = previewCanvas.toDataURL(fmt, qualityRange.value/100);
+  const a = document.createElement('a');
+  a.href = dataURL;
+  a.download = `resized-image.${ext}`;
+  a.click();
+});
+
+function fmtBytes(b) {
+  if(b < 1024) return b + ' B';
+  if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(2) + ' MB';
+}
+
+/* ══════════════════════════
+   PLAY CARDS — WAR
+══════════════════════════ */
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const RANK_VAL = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,J:11,Q:12,K:13,A:14};
+
+let playerDeck=[], cpuDeck=[], round=0, pWins=0, cWins=0, gameOver=false;
+
+function buildDeck() {
+  const d = [];
+  for(let s of SUITS) for(let r of RANKS) d.push({suit:s,rank:r,val:RANK_VAL[r],red:s==='♥'||s==='♦'});
+  return d;
+}
+function shuffle(a) {
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function initWarGame() {
+  const deck = shuffle(buildDeck());
+  playerDeck = deck.slice(0,26);
+  cpuDeck = deck.slice(26);
+  round=0; pWins=0; cWins=0; gameOver=false;
+  updateWarUI();
+  document.getElementById('battleLog').innerHTML = '';
+  document.getElementById('pCardSlot').innerHTML = '<span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>';
+  document.getElementById('cCardSlot').innerHTML = '<span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>';
+  setWarResult('— DRAW A CARD —','idle');
+  document.getElementById('drawBtn').disabled = false;
+  document.getElementById('roundNum').textContent = `Round 1 / 26`;
+}
+function updateWarUI() {
+  document.getElementById('pScore').textContent = pWins;
+  document.getElementById('cScore').textContent = cWins;
+  document.getElementById('pCardsLeft').textContent = `${playerDeck.length} cards left`;
+  document.getElementById('cCardsLeft').textContent = `${cpuDeck.length} cards left`;
+}
+function setWarResult(txt, cls) {
+  const el = document.getElementById('warResult');
+  el.textContent = txt;
+  el.className = `war-result ${cls}`;
+}
+function cardHTML(card) {
+  return `<div class="playing-card ${card.red?'red':'black'} flip-anim">
+    <div class="card-rank">${card.rank}${card.suit}</div>
+    <div class="card-center">${card.suit}</div>
+    <div class="card-rank-bot">${card.rank}${card.suit}</div>
+  </div>`;
+}
+function addLog(txt, cls) {
+  const log = document.getElementById('battleLog');
+  const el = document.createElement('div');
+  el.className = 'log-item';
+  el.innerHTML = txt.replace(/WIN/g,'<span class="win">WIN</span>').replace(/LOSE/g,'<span class="lose">LOSE</span>').replace(/TIE/g,'<span class="tie">TIE</span>');
+  log.insertBefore(el, log.firstChild);
+  if(log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+document.getElementById('drawBtn').addEventListener('click', () => {
+  if(gameOver || playerDeck.length===0 || cpuDeck.length===0) return;
+  round++;
+  const pc = playerDeck.pop();
+  const cc = cpuDeck.pop();
+  document.getElementById('pCardSlot').innerHTML = cardHTML(pc);
+  document.getElementById('cCardSlot').innerHTML = cardHTML(cc);
+  document.getElementById('roundNum').textContent = `Round ${round} / 26`;
+
+  let result;
+  if(pc.val > cc.val){ pWins++; result='win'; setWarResult('🏆 YOU WIN!','win'); }
+  else if(cc.val > pc.val){ cWins++; result='lose'; setWarResult('💀 CPU WINS','lose'); }
+  else { result='tie'; setWarResult('🤝 TIE!','tie'); }
+
+  addLog(`R${round}: You ${pc.rank}${pc.suit} vs CPU ${cc.rank}${cc.suit} — ${result.toUpperCase()}`);
+  updateWarUI();
+
+  if(playerDeck.length===0) endWarGame();
+});
+
+function endWarGame() {
+  gameOver = true;
+  document.getElementById('drawBtn').disabled = true;
+  if(pWins > cWins) setWarResult(`🏆 YOU WIN! ${pWins}-${cWins}`,'win');
+  else if(cWins > pWins) setWarResult(`💀 CPU WINS ${cWins}-${pWins}`,'lose');
+  else setWarResult(`🤝 DRAW! ${pWins}-${cWins}`,'tie');
+  addLog(`— GAME OVER — You: ${pWins} · CPU: ${cWins}`);
+}
+
+document.getElementById('newGameBtn').addEventListener('click', initWarGame);
+initWarGame();
+
+/* ══════════════════════════
+   ROLL DICE
+══════════════════════════ */
+let diceCount = 2, rolling = false, rollHistory = [];
+
+const FACE_DOTS = {
+  1: [[1,1]],
+  2: [[0,0],[2,2]],
+  3: [[0,0],[1,1],[2,2]],
+  4: [[0,0],[0,2],[2,0],[2,2]],
+  5: [[0,0],[0,2],[1,1],[2,0],[2,2]],
+  6: [[0,0],[0,2],[1,0],[1,2],[2,0],[2,2]]
+};
+
+function dotGrid(n) {
+  const cls = ['','face-1','face-2','face-3','face-4','face-5','face-6'][n];
+  const dots = Array(n).fill(0).map((_, i) =>
+    n===5 && i===2 ? '<div class="dot center-dot"></div>' : '<div class="dot"></div>'
+  ).join('');
+  return `<div class="die-face ${cls}">${dots}</div>`;
+}
+
+function buildDieFaces(val) {
+  // Build all 6 faces; face showing val will be front after transform
+  return [1,2,3,4,5,6].map(n => dotGrid(n)).join('');
+}
+
+// Rotation maps: face n facing viewer
+const FACE_ROTS = {
+  1: {rx:0,  ry:0},
+  2: {rx:0,  ry:180},
+  3: {rx:0,  ry:-90},
+  4: {rx:0,  ry:90},
+  5: {rx:-90,ry:0},
+  6: {rx:90, ry:0}
+};
+
+function buildTray() {
+  const tray = document.getElementById('diceTray');
+  tray.innerHTML = '';
+  for(let i=0;i<diceCount;i++){
+    const wrap = document.createElement('div');
+    wrap.className = 'die-wrap';
+    wrap.innerHTML = `<div class="die" id="die-${i}">${buildDieFaces(1)}</div>`;
+    tray.appendChild(wrap);
+  }
+}
+
+function updateCountDisplay() {
+  document.getElementById('diceCountDisplay').textContent = diceCount;
+  buildTray();
+}
+
+document.getElementById('diceDown').addEventListener('click', () => {
+  if(diceCount>1){diceCount--;updateCountDisplay();}
+});
+document.getElementById('diceUp').addEventListener('click', () => {
+  if(diceCount<6){diceCount++;updateCountDisplay();}
+});
+
+document.getElementById('rollBtn').addEventListener('click', () => {
+  if(rolling) return;
+  rolling = true;
+  const results = Array.from({length:diceCount}, () => Math.floor(Math.random()*6)+1);
+
+  // animate each die
+  results.forEach((val, i) => {
+    const die = document.getElementById(`die-${i}`);
+    const extra = Math.floor(Math.random()*3)*360;
+    const rot = FACE_ROTS[val];
+    die.style.setProperty('--rx', `${rot.rx + extra}deg`);
+    die.style.setProperty('--ry', `${rot.ry + extra}deg`);
+    die.classList.remove('rolling');
+    void die.offsetWidth; // reflow
+    die.classList.add('rolling');
+  });
+
+  setTimeout(() => {
+    // Show stats
+    const total = results.reduce((a,b)=>a+b,0);
+    const high = Math.max(...results);
+    const avg = (total/results.length).toFixed(1);
+    document.getElementById('diceResults').textContent = results.join(' · ');
+    document.getElementById('diceTotal').textContent = total;
+    document.getElementById('diceHigh').textContent = high;
+    document.getElementById('diceAvg').textContent = avg;
+    document.getElementById('sumPanel').style.display = 'flex';
+
+    // History
+    rollHistory.unshift(total);
+    if(rollHistory.length>10) rollHistory.pop();
+    const chips = document.getElementById('historyChips');
+    chips.innerHTML = rollHistory.map(t => `<div class="h-chip">Total: ${t}</div>`).join('');
+    document.getElementById('rollHistoryPanel').style.display = 'block';
+
+    rolling = false;
+  }, 900);
+});
+
+document.getElementById('clearHistBtn').addEventListener('click', () => {
+  rollHistory = [];
+  document.getElementById('historyChips').innerHTML = '';
+  document.getElementById('rollHistoryPanel').style.display = 'none';
+  document.getElementById('sumPanel').style.display = 'none';
+});
+
+// init tray
+buildTray();
+</script>
+</body>
+</html>
