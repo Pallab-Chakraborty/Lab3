@@ -1,4 +1,4 @@
-# ⚡ Lab3 — Interactive Playground
+# ⚡ Interactive Playground
 
 > Live site: [https://pallab-chakraborty.github.io/InteractivePlayground/)
 
