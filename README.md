@@ -1,6 +1,6 @@
 # ⚡ Lab3 — Interactive Playground
 
-> Live site: [pallab-chakraborty.github.io/Lab3](https://pallab-chakraborty.github.io/Lab3/)
+> Live site: [https://pallab-chakraborty.github.io/InteractivePlayground/)
 
 A polished, arcade-themed interactive web playground featuring **3 fully functional tools** — all built with pure HTML, CSS, and JavaScript. No frameworks, no dependencies, just clean code running entirely in the browser.
 
