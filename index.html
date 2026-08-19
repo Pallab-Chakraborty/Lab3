@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interactive Playground — Pallab Chakraborty</title>
+<meta name="description" content="Three interactive browser tools — Image Sizer, Play Cards (War), and Roll Dice — built with pure HTML, CSS and vanilla JavaScript."/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">LAB<span>3</span></div>
+  <nav>
+    <a href="#imagesizer">Sizer</a>
+    <a href="#playcards">Cards</a>
+    <a href="#rolldice">Dice</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">⚡ Interactive Lab by Pallab Chakraborty</div>
+  <h1 class="hero-title">
+    <span class="c1">IMAGE</span> SIZER<br/>
+    PLAY <span class="c2">CARDS</span><br/>
+    ROLL <span class="c3">DICE</span>
+  </h1>
+  <p class="hero-sub">Three powerful interactive tools in one place. Built with pure HTML, CSS & JavaScript.</p>
+  <div class="hero-pills">
+    <a href="#imagesizer" class="pill pill-cyan">🖼️ Image Sizer</a>
+    <a href="#playcards" class="pill pill-amber">🃏 Play Cards</a>
+    <a href="#rolldice" class="pill pill-pink">🎲 Roll Dice</a>
+  </div>
+</section>
+
+<!-- ══ SECTION 1: IMAGE SIZER ══ -->
+<section id="imagesizer">
+  <div class="section-header reveal">
+    <div class="section-num">01 / 03</div>
+    <h2 class="section-title" style="color:var(--cyan)">IMAGE SIZER</h2>
+    <p class="section-desc">Upload, resize, convert format & download your image instantly — all in the browser</p>
+  </div>
+
+  <div class="panel panel-cyan reveal">
+    <div class="sizer-layout">
+      <!-- Controls -->
+      <div class="sizer-controls">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="imgInput" accept="image/*"/>
+          <div class="upload-icon">📁</div>
+          <div class="upload-text"><strong>Click or drag</strong> to upload an image</div>
+          <div class="upload-text" style="margin-top:.3rem;font-size:.75rem;">PNG · JPG · WEBP · GIF</div>
+        </div>
+
+        <div class="sizer-row">
+          <div>
+            <label>WIDTH (px)</label>
+            <input class="input" type="number" id="widthInput" placeholder="e.g. 800"/>
+          </div>
+          <div>
+            <label>HEIGHT (px)</label>
+            <input class="input" type="number" id="heightInput" placeholder="e.g. 600"/>
+          </div>
+        </div>
+
+        <div class="lock-row">
+          <button class="lock-btn locked" id="lockBtn" title="Lock aspect ratio">🔒</button>
+          <span class="lock-label" id="lockLabel">Aspect ratio locked</span>
+        </div>
+
+        <div class="format-row">
+          <div>
+            <label>OUTPUT FORMAT</label>
+            <select class="input" id="formatSelect">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg" selected>JPEG</option>
+              <option value="image/webp">WEBP</option>
+            </select>
+          </div>
+          <div>
+            <label>QUALITY</label>
+            <div class="quality-row">
+              <input type="range" id="qualityRange" min="10" max="100" value="90"/>
+              <span class="quality-val" id="qualityVal">90%</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-cyan" id="resizeBtn" disabled style="width:100%;justify-content:center;">
+          ⚡ Resize & Preview
+        </button>
+        <button class="btn btn-ghost" id="downloadBtn" disabled style="width:100%;justify-content:center;">
+          ⬇️ Download Image
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div>
+        <div class="sizer-preview-area">
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <div>🖼️</div>
+            <p>Preview will appear here</p>
+          </div>
+          <canvas id="previewCanvas"></canvas>
+        </div>
+        <div class="sizer-info" id="sizerInfo" style="display:none;">
+          <div class="info-chip">Original: <span id="origSize">—</span></div>
+          <div class="info-chip">Output: <span id="outSize">—</span></div>
+          <div class="info-chip">Dims: <span id="outDims">—</span></div>
+          <div class="info-chip">Saved: <span id="savedPct">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECTION 2: PLAY CARDS ══ -->
+<section id="playcards">
+  <div class="section-header reveal">
+    <div class="section-num">02 / 03</div>
+    <h2 class="section-title" style="color:var(--amber)">PLAY CARDS — WAR</h2>
+    <p class="section-desc">Draw a card each round. Highest card wins the round. Most wins after 10 rounds wins the game!</p>
+  </div>
+
+  <div class="panel panel-amber reveal war-layout">
+    <!-- Scores -->
+    <div class="war-scores">
+      <div class="score-box" id="pScoreBox">
+        <div class="score-name">You</div>
+        <div class="score-num" id="pScore">0</div>
+        <div class="score-cards" id="pCardsLeft">26 cards left</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="score-box" id="cScoreBox">
+        <div class="score-name">CPU</div>
+        <div class="score-num" id="cScore">0</div>
+        <div class="score-cards" id="cCardsLeft">26 cards left</div>
+      </div>
+    </div>
+
+    <!-- Arena -->
+    <div class="war-arena">
+      <div class="arena-side">
+        <div class="arena-label">Your Card</div>
+        <div class="card-slot" id="pCardSlot">
+          <span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>
+        </div>
+      </div>
+      <div class="arena-center">
+        <div class="war-result idle" id="warResult">— DRAW A CARD —</div>
+        <div style="margin-top:.8rem;font-size:.7rem;color:var(--muted)" id="roundNum">Round 1 / 26</div>
+      </div>
+      <div class="arena-side">
+        <div class="arena-label">CPU Card</div>
+        <div class="card-slot" id="cCardSlot">
+          <span style="font-size:.65rem;letter-spacing:1px;">DRAW</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="war-btns">
+      <button class="btn btn-amber" id="drawBtn">🃏 Draw Card</button>
+      <button class="btn btn-ghost" id="newGameBtn">🔄 New Game</button>
+    </div>
+
+    <!-- Log -->
+    <div class="war-log">
+      <div class="log-title">📜 Battle Log</div>
+      <div id="battleLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECTION 3: ROLL DICE ══ -->
+<section id="rolldice">
+  <div class="section-header reveal">
+    <div class="section-num">03 / 03</div>
+    <h2 class="section-title" style="color:var(--pink)">ROLL DICE</h2>
+    <p class="section-desc">Roll up to 6 dice at once with a satisfying 3D animation. Track your totals and history.</p>
+  </div>
+
+  <div class="panel panel-pink reveal dice-layout">
+    <!-- Controls -->
+    <div class="dice-controls">
+      <div class="dice-count-label">NUMBER OF DICE</div>
+      <div class="dice-count-row">
+        <button class="count-btn" id="diceDown">−</button>
+        <div class="count-display" id="diceCountDisplay">2</div>
+        <button class="count-btn" id="diceUp">+</button>
+      </div>
+    </div>
+
+    <!-- Tray -->
+    <div class="dice-tray" id="diceTray"></div>
+
+    <!-- Stats -->
+    <div class="dice-sum-panel" id="sumPanel" style="display:none;">
+      <div class="sum-item">
+        <div class="sum-label">Dice Results</div>
+        <div class="sum-value" id="diceResults">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Total</div>
+        <div class="sum-value total" id="diceTotal">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Highest</div>
+        <div class="sum-value" id="diceHigh">—</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Average</div>
+        <div class="sum-value" id="diceAvg">—</div>
+      </div>
+    </div>
+
+    <!-- Roll History -->
+    <div class="roll-history" id="rollHistoryPanel" style="display:none;">
+      <div class="log-title">📊 Roll History (last 10)</div>
+      <div class="history-chips" id="historyChips"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="dice-btns">
+      <button class="btn btn-pink" id="rollBtn">🎲 Roll Dice!</button>
+      <button class="btn btn-ghost" id="clearHistBtn">🗑️ Clear History</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>Built by <a href="https://github.com/Pallab-Chakraborty" target="_blank">Pallab Chakraborty</a> · JNU CSE</span>
+  <span>Lab3 · Pure HTML/CSS/JS</span>
+</footer>
+
+<script src="js/reveal.js"></script>
+<script src="js/imageSizer.js"></script>
+<script src="js/playCards.js"></script>
+<script src="js/rollDice.js"></script>
+</body>
+</html>

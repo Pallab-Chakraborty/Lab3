@@ -1,0 +1,24 @@
+{
+  "name": "interactive-playground",
+  "version": "1.0.0",
+  "description": "Three interactive browser tools — Image Sizer, Play Cards (War), and Roll Dice — built with pure HTML, CSS and vanilla JavaScript.",
+  "private": true,
+  "license": "MIT",
+  "author": "Pallab Chakraborty",
+  "homepage": "https://pallab-chakraborty.github.io/InteractivePlayground/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pallab-Chakraborty/InteractivePlayground.git"
+  },
+  "scripts": {
+    "start": "npx http-server . -p 8000 -c-1",
+    "serve": "npx http-server . -p 8000 -c-1"
+  },
+  "keywords": [
+    "javascript",
+    "canvas",
+    "css-3d",
+    "browser-game",
+    "static-site"
+  ]
+}
